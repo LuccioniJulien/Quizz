@@ -97,10 +97,12 @@ class QuizActivity : AppCompatActivity() {
         AlertDialog.Builder(this).create().apply {
             setTitle("The end")
             setMessage("The game has ended. \nYour final score is: $score/")
-            setButton(AlertDialog.BUTTON_NEUTRAL, "OK") { dialog, _ -> dialog.dismiss() }
+            setButton(AlertDialog.BUTTON_NEUTRAL, "OK") { dialog, _ ->
+                dialog.dismiss()
+                finish()
+            }
             show()
         }
-
     }
 
     private fun showSnackBar(message: String, view: View) {
