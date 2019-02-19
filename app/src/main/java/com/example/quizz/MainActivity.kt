@@ -1,5 +1,6 @@
 package com.example.quizz
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import com.google.android.material.navigation.NavigationView
@@ -13,6 +14,11 @@ import androidx.fragment.app.FragmentTransaction
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.row_score.*
+import android.widget.Toast
+import androidx.core.app.NotificationCompat.getExtras
+import android.content.Intent
+
+
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -28,7 +34,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
         title = "Home"
         nav_view.setNavigationItemSelectedListener(this)
+        var flag = intent.getBooleanExtra("questions",false)
         showFragment(MainFragment())
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (data!!.hasExtra("questions")) {
+                Toast.makeText(
+                    this, data.extras!!.getString("questions"),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     override fun onBackPressed() {
@@ -36,18 +54,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             drawer_layout.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -63,11 +69,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 fragment.listeScores = getScores()
                 showFragment(fragment)
             }
+            R.id.nav_questions -> {
+                title = "Question"
+                showFragment(QuestionsFragment())
+            }
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
-
 
     private fun getScores(): List<Pair<String, String>> {
         val tempList: ArrayList<Pair<String, Int>> = arrayListOf()

@@ -11,18 +11,44 @@ import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_quiz.*
+import org.jetbrains.anko.db.classParser
+import org.jetbrains.anko.db.parseList
+import org.jetbrains.anko.db.select
 
 class QuizActivity : AppCompatActivity() {
 
-    val quizzHelp = HelperQuizz().iterateThat().iterator()
-    var reponses: MutableList<Pair<String, Boolean>>? = null
+    private var helper = HelperQuizz()
+    private var quizzHelp: Iterator<MutableMap.MutableEntry<String, MutableList<Pair<String, Boolean>>>>? = null
+    private var reponses: MutableList<Pair<String, Boolean>>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz)
-        setQuestion()
-        var name = intent.getStringExtra("Nickname")
+        val name = intent.getStringExtra("Nickname")
+        quizzHelp = helper.iterateThat(getQuestion()).iterator()
+
         titleQuestion.text = "$name, here the question : ";
+        setQuestion()
+    }
+
+    private fun getQuestion(): MutableMap<String, MutableList<Pair<String, Boolean>>> {
+        var quizzMap: MutableMap<String, MutableList<Pair<String, Boolean>>> = hashMapOf()
+        database.use {
+            val res = select("Question")
+            res.exec {
+                this.parseList(classParser<QuestionsFragment.Question>()).forEach {
+                    val id = it.id
+                    select("Reponse").whereArgs("idQuestion=$id").exec {
+                        var tempReponse: MutableList<Pair<String, Boolean>> = mutableListOf()
+                        this.parseList(classParser<QuestionsFragment.Reponse>()).forEach { x ->
+                            tempReponse.add(x.reponse to x.isGoodAnswer)
+                        }
+                        quizzMap[it.question] = tempReponse
+                    }
+                }
+            }
+        }
+        return quizzMap
     }
 
     fun answer_button_OnClick(view: View) {
@@ -75,7 +101,7 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun next() {
-        if (quizzHelp.hasNext()) {
+        if (quizzHelp!!.hasNext()) {
             setQuestion()
         } else {
             setHightScoreAndShowModal()
@@ -91,12 +117,13 @@ class QuizActivity : AppCompatActivity() {
     private fun setHightScoreAndShowModal() {
         val name = intent.getStringExtra("Nickname")
         val score = txtScore.text.toString()
+        val total = helper.quizzMap.count()
         getSharedPreferences("myPrefs", Context.MODE_PRIVATE).apply {
             this.edit().putInt(name, score.toInt()).apply()
         }
         AlertDialog.Builder(this).create().apply {
             setTitle("The end")
-            setMessage("The game has ended. \nYour final score is: $score/")
+            setMessage("The game has ended. \nYour final score is: $score/$total")
             setButton(AlertDialog.BUTTON_NEUTRAL, "OK") { dialog, _ ->
                 dialog.dismiss()
                 finish()
@@ -111,8 +138,8 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun setQuestion() {
-        val row = quizzHelp.next()
-        question.text = row.key
+        val row = quizzHelp?.next()
+        question.text = row!!.key
         reponses = row.value
         reponseUno.text = row.value[0].first
         reponseDeusio.text = row.value[1].first

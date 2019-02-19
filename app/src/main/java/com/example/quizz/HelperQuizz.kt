@@ -1,6 +1,6 @@
 package com.example.quizz
 
-class HelperQuizz {
+class HelperQuizz() {
 
     var quizzMap: MutableMap<String, MutableList<Pair<String, Boolean>>>
 
@@ -12,7 +12,10 @@ class HelperQuizz {
         quizzMap["Est ce que cette application mérite 20/20 coef 9999 ?"] = mutableListOf("Oui" to true, "Yes" to true, "Ja" to true)
     }
 
-    fun iterateThat() = sequence {
+    fun iterateThat(newlist:MutableMap<String, MutableList<Pair<String, Boolean>>>? = null) = sequence {
+        newlist?.forEach {
+            quizzMap[it.key] = it.value
+        }
         for (item in quizzMap) {
             yield(item)
         }
