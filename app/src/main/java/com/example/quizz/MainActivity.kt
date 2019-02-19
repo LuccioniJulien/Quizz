@@ -7,15 +7,12 @@ import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import android.view.Menu
 import android.view.MenuItem
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.row_score.*
 import android.widget.Toast
-import androidx.core.app.NotificationCompat.getExtras
 import android.content.Intent
 
 
@@ -34,19 +31,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
         title = "Home"
         nav_view.setNavigationItemSelectedListener(this)
-        var flag = intent.getBooleanExtra("questions",false)
         showFragment(MainFragment())
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
-            if (data!!.hasExtra("questions")) {
-                Toast.makeText(
-                    this, data.extras!!.getString("questions"),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
     }
 
     override fun onBackPressed() {

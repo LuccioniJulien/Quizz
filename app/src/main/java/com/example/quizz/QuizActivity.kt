@@ -26,7 +26,6 @@ class QuizActivity : AppCompatActivity() {
         setContentView(R.layout.activity_quiz)
         val name = intent.getStringExtra("Nickname")
         quizzHelp = helper.iterateThat(getQuestion()).iterator()
-
         titleQuestion.text = "$name, here the question : ";
         setQuestion()
     }
